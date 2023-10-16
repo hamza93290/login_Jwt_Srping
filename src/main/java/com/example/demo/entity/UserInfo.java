@@ -32,6 +32,12 @@ public class UserInfo {
 		this.password = password;
 		this.roles = roles;
 	}
+	public UserInfo(int id, String name, String email,  String roles) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.roles = roles;
+	}
 	
 	public int getId() {
 		return id;

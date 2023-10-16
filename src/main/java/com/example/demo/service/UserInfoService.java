@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.UserInfo;
+import com.example.demo.mapper.MapperMyBatis;
 import com.example.demo.repository.UserInfoRepository; 
 
 @Service
@@ -22,6 +23,9 @@ public class UserInfoService implements UserDetailsService {
 
 	@Autowired
 	private PasswordEncoder encoder; 
+	
+	@Autowired
+	private MapperMyBatis mapperMyBatis;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException { 
@@ -34,6 +38,19 @@ public class UserInfoService implements UserDetailsService {
 				.orElseThrow(() -> new UsernameNotFoundException("User not found " + username)); 
 	} 
 
+	public UserInfo findByUsername(String name) {
+
+		if(name != null && !name.isBlank()) {
+
+			Optional<UserInfo> existingUser = mapperMyBatis.findByName(name);
+
+			return existingUser.orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found", name)));
+
+		}
+
+		return null;
+
+	}
 	public String addUser(UserInfo userInfo) { 
 		userInfo.setPassword(encoder.encode(userInfo.getPassword())); 
 		repository.save(userInfo); 

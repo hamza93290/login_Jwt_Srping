@@ -22,10 +22,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.example.demo.Dto.UserInfoDto;
+import com.example.demo.Dto.UserInfoMapper;
 import com.example.demo.entity.AuthRequest;
 import com.example.demo.entity.UserInfo;
 import com.example.demo.service.JwtServiceImplementation;
-import com.example.demo.service.UserInfoService; 
+import com.example.demo.service.UserInfoService;
+
+import jakarta.servlet.http.HttpServletRequest; 
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -40,6 +45,9 @@ public class UserController {
 
 	@Autowired
 	private AuthenticationManager authenticationManager; 
+	
+	@Autowired
+	private UserInfoMapper mapper;
 
 //	@GetMapping("/welcome") 
 //	@ResponseBody
@@ -61,17 +69,34 @@ public class UserController {
 	    return response;
 	}
 
-	@GetMapping("/userDetail/{username}")
-    public UserDetails getUserDetails(@PathVariable String username) {
-        try {
-            UserDetails userDetails = service.loadUserByUsername(username);
-            System.out.println(userDetails);
-            return userDetails;
-        } catch (UsernameNotFoundException e) {
-            // Gérer l'exception si l'utilisateur n'est pas trouvé
-            return null; // Ou renvoyez un code d'erreur approprié
-        }
-    }
+	@GetMapping("/userDetail")
+	public UserInfoDto findByUsername(HttpServletRequest request) {
+
+		String authorizationHeader = request.getHeader("Authorization");
+
+		if (authorizationHeader != null & authorizationHeader.startsWith("Bearer ")) {
+
+			String token = authorizationHeader.substring(7);
+
+	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+	        String username = authentication.getName();
+
+	        UserInfo existingUserInfo = service.findByUsername(username);
+
+	        UserInfoDto existingUserDto = mapper.toDto(existingUserInfo);
+
+			return existingUserDto;
+
+		} else {
+
+			return null;
+
+		}
+
+ 
+
+	}
 	
 
 	@PostMapping("/addNewUser") 
